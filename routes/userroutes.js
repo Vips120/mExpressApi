@@ -1,6 +1,6 @@
 let express = require("express");
-let Joi = require("@hapi/joi");
 let router = express.Router();
+let bcrypt = require("bcrypt");
 let User = require("../modeldb/usermodel");
 
 //INSERT 
@@ -8,7 +8,7 @@ let User = require("../modeldb/usermodel");
 router.post("/createnewuser", async (req, res) => {
     let user = await User.findOne({ "UserLogin.EmailId": req.body.UserLogin.EmailId });
     if (user) { return res.status(403).send({ message: "already exsist user" }) };
-    let { error } = UserValidationError(req.body);
+    let { error } = User.UserValidationError(req.body);
     if (error) { return res.send(error.details[0].message) };
     let { FirstName, LastName, Address, UserLogin } = req.body;
     let newUser = new User({
@@ -17,6 +17,8 @@ router.post("/createnewuser", async (req, res) => {
         Address,
         UserLogin
     });
+    let salt = await bcrypt.genSalt(10);
+    newUser.UserLogin.Password = await bcrypt.hash(newUser.UserLogin.Password, salt);
     let data = await newUser.save();
     res.send({ message: "Thank you for the registration", d: data });
 });
@@ -40,7 +42,7 @@ router.get("/fetchuserdata/:id", async (req, res) => {
 router.put("/updatedata/:id", async (req, res) => {
     let user = await User.findById(req.params.id);
     if (!user) { return res.status(404).send({ message: "Invalid user id" }) };
-    let { error } = UserValidationError(req.body);
+    let { error } = User.UserValidationError(req.body);
     if (error) { return res.send(error.details[0].message) };
     // let { FirstName, LastName, Address, UserLogin } = user;
     // let { FirstName, LastName, Address, UserLogin} = req.body;
@@ -68,17 +70,5 @@ router.delete("/removedata/:id", async (req, res) => {
 
 
 
-function UserValidationError(error) {
-    let Schema = Joi.object({
-        FirstName: Joi.string().min(4).max(100).required(),
-        LastName: Joi.string().min(4).max(100).required(),
-        Address: Joi.string().required(),
-        UserLogin: {
-            EmailId: Joi.string().required().email(),
-            Password: Joi.any().required()
-        }
-    });
-    return Schema.validate(error);
-};
 
 module.exports = router;
