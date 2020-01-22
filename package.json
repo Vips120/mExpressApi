@@ -8,6 +8,7 @@
     "bcrypt": "^3.0.6",
     "config": "^3.2.5",
     "express": "^4.17.1",
+    "fawn": "^2.1.5",
     "jsonwebtoken": "^8.5.1",
     "mongoose": "^5.8.9"
   },
