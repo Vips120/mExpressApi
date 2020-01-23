@@ -5,6 +5,17 @@ let bcrypt = require("bcrypt");
 let jwt = require('jsonwebtoken');
 let User = require("../../modeldb/usermodel");
 let config = require("config");
+let auth = require("../../middleware/auth");
+//loggedin user
+
+router.get("/me", auth, async (req, res) => {
+    let data = await User
+        .userModel
+        .findById(req.user._id)
+        .select("-UserLogin.Password");
+    res.send(data);
+});
+
 router.post("/auth", async (req, res) => {
     let { error } = ValidationError(req.body);
     if (error) { return res.send(error.details[0].message) };
@@ -17,7 +28,7 @@ router.post("/auth", async (req, res) => {
     //IEP -> INFORMATION EXPERT PRINCIPLE
     // let token = jwt.sign({ _id: user._id}, config.get("moniapi"));
     let token = user.Tokenperson();
-    res.send({token: token});
+    res.header("x-auth-token", token).send({token: token});
 });
 
 function ValidationError(error) {

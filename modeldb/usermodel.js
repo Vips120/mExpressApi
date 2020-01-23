@@ -6,6 +6,7 @@ let userSchema = new mongoose.Schema({
     FirstName: { type: String, min: 4, max: 100, trim: true, required: true },
     LastName: { type: String, min: 4, max: 100, trim: true, required: true },
     Address: { type: String, required: true },
+    isAdmin:{type:Boolean},
     UserLogin: {
         EmailId: { type: String, required: true, unique: true },
         Password: { type: String, required: true, min: 4, max: 150 }
@@ -13,7 +14,7 @@ let userSchema = new mongoose.Schema({
 });
 
 userSchema.methods.Tokenperson = function () {
-    let token = jwt.sign({ _id: this._id}, config.get("moniapi"));  
+    let token = jwt.sign({ _id: this._id, isAdmin: this.isAdmin}, config.get("moniapi"));  
     return token;
 };
 

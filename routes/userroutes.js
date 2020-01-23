@@ -2,16 +2,17 @@ let express = require("express");
 let router = express.Router();
 let bcrypt = require("bcrypt");
 let User = require("../modeldb/usermodel");
-
+let auth = require("../middleware/auth");
+let admin = require("../middleware/admin");
 //INSERT 
 
 router.post("/createnewuser", async (req, res) => {
-    let user = await User.findOne({ "UserLogin.EmailId": req.body.UserLogin.EmailId });
+    let user = await User.userModel.findOne({ "UserLogin.EmailId": req.body.UserLogin.EmailId });
     if (user) { return res.status(403).send({ message: "already exsist user" }) };
     let { error } = User.UserValidationError(req.body);
     if (error) { return res.send(error.details[0].message) };
     let { FirstName, LastName, Address, UserLogin } = req.body;
-    let newUser = new User({
+    let newUser = new User.userModel({
         FirstName,
         LastName,
         Address,
@@ -25,8 +26,8 @@ router.post("/createnewuser", async (req, res) => {
 
 
 //Fetch data
-router.get("/fetchuserdata", async (req, res) => {
-    let user = await User.find();
+router.get("/fetchuserdata", auth, async (req, res) => {
+    let user = await User.userModel.find();
     res.send({ u: user }); 
 });
 
@@ -59,8 +60,8 @@ router.put("/updatedata/:id", async (req, res) => {
 
 // remove user record
 
-router.delete("/removedata/:id", async (req, res) => {
-    let user  = await User.findByIdAndRemove(req.params.id);
+router.delete("/removedata/:id", [auth,admin], async (req, res) => {
+    let user  = await User.userModel.findByIdAndRemove(req.params.id);
      if (!user) { return res.status(404).send({ message: "Invalid user id" }) };
     res.send({ message: "Thank you ! come back again " });
 });

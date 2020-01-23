@@ -10,6 +10,7 @@ let auth = require("./routes/auth/auth");
 let genre = require("./routes/movie/genre");
 let movie = require("./routes/movie/movie");
 let stockmovie = require("./routes/transaction/movie");
+let pagination = require("./routes/pagination");
 let config = require("config");
 if (!config.get("moniapi")) {
     console.log("ACCESS DENIED! NO TOKEN FOUND IN ENV");
@@ -24,4 +25,5 @@ app.use("/api", auth);
 app.use("/api", genre);
 app.use("/api", movie);
 app.use("/api/moviestock", stockmovie);
+app.use("/api/pagination", pagination);
 app.listen(port, () => console.log(`port is working on ${port}`));
