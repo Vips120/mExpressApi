@@ -2,6 +2,12 @@ let mongoose = require("mongoose");
 let jwt = require("jsonwebtoken");
 let config = require("config");
 let Joi = require("@hapi/joi");
+let imageSchema = new mongoose.Schema({
+    image: { type: String, required: true }
+});
+
+let imageModel = mongoose.model("file", imageSchema);
+
 let userSchema = new mongoose.Schema({
     FirstName: { type: String, min: 4, max: 100, trim: true, required: true },
     LastName: { type: String, min: 4, max: 100, trim: true, required: true },
@@ -10,7 +16,9 @@ let userSchema = new mongoose.Schema({
     UserLogin: {
         EmailId: { type: String, required: true, unique: true },
         Password: { type: String, required: true, min: 4, max: 150 }
-    }
+    },
+    resetpasswordtoken: { type: String },
+    resetpasswordexpires:{type: Date}
 });
 
 userSchema.methods.Tokenperson = function () {
@@ -34,4 +42,4 @@ function UserValidationError(error) {
 };
 
 
-module.exports = { userModel, UserValidationError };
+module.exports = { userModel, UserValidationError, imageModel };
